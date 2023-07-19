@@ -20,6 +20,7 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Text;
 using UnityEngine;
+using TMPro;
 
 
 /// \mainpage
@@ -129,14 +130,16 @@ public class UDPPacketIO
 	private string remoteHostName;
 	private int remotePort;
 	private int localPort;
+    private TMP_Text statusText;
 	
 	
 	
-	public UDPPacketIO(string hostIP, int remotePort, int localPort){
+	public UDPPacketIO(string hostIP, int remotePort, int localPort, TMP_Text statusText){
 		RemoteHostName = hostIP;
 		RemotePort = remotePort;
 		LocalPort = localPort;
 		socketsOpen = false;
+        StatusText = statusText;
 	}
 	
 	
@@ -161,8 +164,9 @@ public class UDPPacketIO
 		{
 			Sender = new UdpClient();
 			Debug.Log("Opening OSC listener on port " + localPort);
-			
-			IPEndPoint listenerIp = new IPEndPoint(IPAddress.Any, localPort);
+            statusText.text = "Opening OSC listener on port " + localPort;
+
+            IPEndPoint listenerIp = new IPEndPoint(IPAddress.Any, localPort);
 			Receiver = new UdpClient(listenerIp);
 			
 			
@@ -174,9 +178,10 @@ public class UDPPacketIO
 		{
 			Debug.LogWarning("cannot open udp client interface at port "+localPort);
 			Debug.LogWarning(e);
-		}
-		
-		return false;
+            statusText.text = "cannot open udp client interface at port " + localPort + "\n" + e;
+        }
+
+        return false;
 	}
 	
 	/// <summary>
@@ -224,8 +229,10 @@ public class UDPPacketIO
 			return;
 		
 		Sender.Send(packet, length, remoteHostName, remotePort);
-		//Debug.Log("osc message sent to "+remoteHostName+" port "+remotePort+" len="+length);
-	}
+        //Debug.Log("osc message sent to "+remoteHostName+" port "+remotePort+" len="+length);
+        StatusText.text = "osc message sent to " + remoteHostName + " port " + remotePort + " len=" + length;
+
+    }
 	
 	/// <summary>
 	/// Receive a packet of bytes over UDP.
@@ -295,6 +302,18 @@ public class UDPPacketIO
 			localPort = value; 
 		}
 	}
+
+    public TMP_Text StatusText
+    {
+        get
+        {
+            return statusText;
+        }
+        set
+        {
+            statusText = value;
+        }
+    }
 }
 
 //namespace MakingThings
@@ -393,6 +412,7 @@ public class UDPPacketIO
     public int inPort  = 6969;
     public string outIP = "127.0.0.1";
     public int outPort  = 6161;
+    public TMP_Text StatusText;
 
       private UDPPacketIO OscPacketIO;
       Thread ReadThread;
@@ -429,7 +449,7 @@ public class UDPPacketIO
     void Awake() {
 		//print("Opening OSC listener on port " + inPort);
 
-		OscPacketIO = new UDPPacketIO(outIP, outPort, inPort);
+		OscPacketIO = new UDPPacketIO(outIP, outPort, inPort, StatusText);
 		AddressTable = new Hashtable();
 
 		messagesReceived = new ArrayList();

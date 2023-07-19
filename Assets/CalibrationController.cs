@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using extOSC;
 
 public class CalibrationController : MonoBehaviour
 {
-    public OSC osc;
+    public OSCTransmitter transmitter;
 
     [SerializeField] private Button CalibrationButton;
     [SerializeField] private Button FloorSamplingButton;
@@ -29,24 +30,48 @@ public class CalibrationController : MonoBehaviour
 
     private void OnCalibrationClicked()
     {
-        OscMessage message = new OscMessage();
+        //EXAMPLE OF MESSAGE
+        //https://github.com/Iam1337/extOSC
+        //        // Creating a transmitter.
+        //var transmitter = gameObject.AddComponent<OSCTransmitter>();
+
+        //        // Set remote host address.
+        //        transmitter.RemoteHost = "127.0.0.1";
+
+        //        // Set remote port;
+        //        transmitter.RemotePort = 7001;
+        //        Or you can simple create OSCTransmitter component in Unity editor, or use Create/ extOSC / OSC Manager in Hierarchy window.
+
+        //Send OSCMessage
+        //// Create message
+        //        var message = new OSCMessage("/message/address");
+
+        //        // Populate values.
+        //        message.AddValue(OSCValue.String("Hello, world!"));
+        //        message.AddValue(OSCValue.Float(1337f));
+
+        //        // Send message
+        //        transmitter.Send(message);
+
+
+        OSCMessage message = new OSCMessage("");
 
         if (isCalibrating)
         {
             BackButton.interactable = true;
-            message.address = "/stopPipeline";
+            message.Address = "/stopPipeline";
             CalibrationButton.GetComponentInChildren<TMP_Text>().text = "Start Calibration";
             isCalibrating = false;
         }
         else
         {
             BackButton.interactable = false;
-            message.address = "/startCalibrationPipeline";
+            message.Address = "/startCalibrationPipeline";
             CalibrationButton.GetComponentInChildren<TMP_Text>().text = "Stop Calibration";
             isCalibrating = true;
         }
 
-        osc.Send(message);
+        transmitter.Send(message);
     }
 
     private void OnFloorCalibrationSelected()
@@ -59,10 +84,10 @@ public class CalibrationController : MonoBehaviour
         GetComponent<CanvasGroup>().interactable = false;
         MainPanel.GetComponent<Image>().color = Color.red;
 
-        OscMessage message = new OscMessage();
-        message.address = "/setFloorSamplingState";
-        message.values.Add(1);
-        osc.Send(message);
+        OSCMessage message = new OSCMessage("");
+        message.Address = "/setFloorSamplingState";
+        message.AddValue(OSCValue.Int(1));
+        transmitter.Send(message);
 
         FloorSamplingText.text = "Sampling.";
 
@@ -78,10 +103,10 @@ public class CalibrationController : MonoBehaviour
 
         FloorSamplingText.text = "Done";
 
-        message = new OscMessage();
-        message.address = "/setFloorSamplingState";
-        message.values.Add(0);
-        osc.Send(message);
+        message = new OSCMessage("");
+        message.Address = "/setFloorSamplingState";
+        message.AddValue(OSCValue.Int(0));
+        transmitter.Send(message);
         GetComponent<CanvasGroup>().interactable = true;
         MainPanel.GetComponent<Image>().color = Color.white;
     }
@@ -95,10 +120,11 @@ public class CalibrationController : MonoBehaviour
     {
         GetComponent<CanvasGroup>().interactable = false;
         MainPanel.GetComponent<Image>().color = Color.red;
-        OscMessage message = new OscMessage();
-        message.address = "/setExtrinsicSamplingState";
-        message.values.Add(1);
-        osc.Send(message);
+
+        OSCMessage message = new OSCMessage("");
+        message.Address = "/setExtrinsicSamplingState";
+        message.AddValue(OSCValue.Int(1));
+        transmitter.Send(message);
 
         SamplingText.text = "Sampling.";
 
@@ -114,10 +140,10 @@ public class CalibrationController : MonoBehaviour
 
         SamplingText.text = "Done";
 
-        message = new OscMessage();
-        message.address = "/setExtrinsicSamplingState";
-        message.values.Add(0);
-        osc.Send(message);
+        message = new OSCMessage("");
+        message.Address = "/setExtrinsicSamplingState";
+        message.AddValue(OSCValue.Int(0));
+        transmitter.Send(message);
 
         sampleCount++;
         SamplingCountText.text = "Sample Count: " + sampleCount.ToString();

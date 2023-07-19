@@ -1,12 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
+using extOSC;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class RecordingController : MonoBehaviour
 {
-    public OSC osc;
+    public OSCTransmitter transmitter;
 
     [SerializeField] private GameObject RecordingPanel;
     [SerializeField] private GameObject RecordingNameSubPanel;
@@ -34,24 +35,24 @@ public class RecordingController : MonoBehaviour
 
     public void StreamingOptionClicked()
     {
-        OscMessage message = new OscMessage();
+        OSCMessage message = new OSCMessage("");
 
         if (isStreaming)
         {
             BackButton.interactable = true;
-            message.address = "/stopPipeline";
+            message.Address = "/stopPipeline";
             StreamingButton.GetComponentInChildren<TMP_Text>().text = "Start Streaming";
             isStreaming = false;
         }
         else
         {
             BackButton.interactable = false;
-            message.address = "/startCapturePipeline";
+            message.Address = "/startCapturePipeline";
             StreamingButton.GetComponentInChildren<TMP_Text>().text = "Stop Streaming";
             isStreaming = true;
         }
 
-        osc.Send(message);
+        transmitter.Send(message);
     }
 
     private void RecordOptionClicked()
@@ -63,10 +64,10 @@ public class RecordingController : MonoBehaviour
 
             RecordingButton.GetComponentInChildren<TMP_Text>().text = "Start Recording";
 
-            OscMessage message = new OscMessage();
+            OSCMessage message = new OSCMessage("");
 
-            message.address = "/endRecording";
-            osc.Send(message);
+            message.Address = "/endRecording";
+            transmitter.Send(message);
 
             isRecording = false;
         }
@@ -97,10 +98,10 @@ public class RecordingController : MonoBehaviour
 
         isRecording = true;
 
-        OscMessage message = new OscMessage();
-        message.address = "/beginRecording";
-        message.values.Add(RecordingInputField.text);
-        osc.Send(message);
+        OSCMessage message = new OSCMessage("");
+        message.Address = "/beginRecording";
+        message.AddValue(OSCValue.String(RecordingInputField.text));
+        transmitter.Send(message);
     }
 
     private void CancelOptionClicked()
